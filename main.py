@@ -23,6 +23,13 @@ SRC = os.path.join(HERE, "entry.png")
 DST_DIR = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
 DST = os.path.join(DST_DIR, "entry.png")
 
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+
+
+def _is_png(path):
+    with open(path, "rb") as f:
+        return f.read(8) == PNG_MAGIC
+
 
 def _sha256(path):
     digest = hashlib.sha256()
@@ -35,6 +42,9 @@ def _sha256(path):
 def main():
     if not os.path.isfile(SRC):
         print(f"missing source image: {SRC}", file=sys.stderr)
+        return 1
+    if not _is_png(SRC):
+        print(f"source image is not a PNG: {SRC}", file=sys.stderr)
         return 1
     os.makedirs(DST_DIR, exist_ok=True)
     shutil.copyfile(SRC, DST)
